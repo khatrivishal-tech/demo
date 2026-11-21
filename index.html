@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>South India Electricity Bill Portal</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Inter, Arial, sans-serif;
+    background: #eef4f8;
+    color: #17212b;
+  }
+  .app {
+    min-height: 100vh;
+    display: flex;
+  }
+  .sidebar {
+    display: none;
+  }
+  .brand {
+    font-size: 21px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    font-size: 12px;
+    opacity: .75;
+    margin-bottom: 35px;
+  }
+  .nav button {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: #dceefa;
+    text-align: left;
+    padding: 14px 15px;
+    border-radius: 10px;
+    margin: 4px 0;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .nav button.active, .nav button:hover {
+    background: rgba(255,255,255,.15);
+    color: white;
+  }
+  .side-note {
+    margin-top: auto;
+    background: rgba(255,255,255,.10);
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .main {
+    flex: 1;
+    width: 100%;
+    padding: 0 42px 35px;
+    overflow: auto;
+  }
+
+  .site-header {
+    min-height: 82px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    border-bottom: 1px solid #e3ebef;
+    background: white;
+    margin: 0 -42px 28px;
+    padding: 14px 42px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    background: #075985;
+    color: white;
+    font-size: 21px;
+  }
+  .brand-name {
+    font-size: 20px;
+    font-weight: 850;
+    color: #073b5a;
+  }
+  .brand-subtitle {
+    color: #71808d;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+  .top-nav {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #f2f6f8;
+    padding: 5px;
+    border-radius: 12px;
+  }
+  .top-nav button {
+    border: 0;
+    background: transparent;
+    color: #52636f;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .top-nav button.active,
+  .top-nav button:hover {
+    background: white;
+    color: #075985;
+    box-shadow: 0 2px 8px rgba(20,50,70,.08);
+  }
+  .page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .service-pill {
+    background: white;
+    padding: 10px 15px;
+    border-radius: 22px;
+    font-size: 13px;
+    color: #61717c;
+    box-shadow: 0 4px 15px rgba(0,0,0,.05);
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .topbar h1 { margin: 0; font-size: 28px; }
+  .consumer {
+    background: white;
+    padding: 9px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    box-shadow: 0 4px 15px rgba(0,0,0,.05);
+  }
+
+  .slide { display: none; animation: fade .25s ease; }
+  .slide.active { display: block; }
+  @keyframes fade { from {opacity:0; transform:translateY(5px)} to {opacity:1; transform:none} }
+
+  .hero {
+    background: linear-gradient(120deg, #0b6b96, #0f8a8a);
+    color: white;
+    padding: 28px;
+    border-radius: 18px;
+    margin-bottom: 20px;
+  }
+  .hero h2 { margin: 0 0 8px; font-size: 24px; }
+  .hero p { margin: 0; opacity: .88; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 6px 20px rgba(22,44,60,.07);
+  }
+  .card h3 { margin: 0 0 16px; font-size: 17px; }
+  .amount {
+    font-size: 36px;
+    font-weight: 800;
+    color: #075985;
+    margin: 5px 0;
+  }
+  .muted { color: #71808d; font-size: 13px; }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 11px 0;
+    border-bottom: 1px solid #edf1f4;
+    font-size: 14px;
+  }
+  .row:last-child { border-bottom: 0; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    margin: 12px 0 7px;
+  }
+  input, select {
+    width: 100%;
+    padding: 12px 13px;
+    border: 1px solid #d7e0e6;
+    border-radius: 9px;
+    outline: none;
+    font-size: 14px;
+    background: #fff;
+  }
+  input:focus, select:focus { border-color: #0787aa; }
+  .btn {
+    border: 0;
+    border-radius: 9px;
+    padding: 12px 17px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .primary { background: #087ea4; color: white; }
+  .primary:hover { background: #066a8a; }
+  .secondary { background: #e8f2f6; color: #075985; }
+  .danger { background: #fff0f0; color: #b42318; }
+
+  .actions { display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+  .status {
+    padding: 13px 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+    font-size: 13px;
+    display: none;
+  }
+  .success { background:#eaf8ef; color:#18733b; }
+  .warning { background:#fff7df; color:#805d00; }
+
+  .bill {
+    border: 1px solid #dfe7eb;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .bill-head {
+    padding: 20px;
+    background: #f5fafc;
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+  }
+  .bill-head strong { font-size:18px; }
+  .bill-body { padding:20px; }
+  .bill-total {
+    font-size: 26px;
+    font-weight:800;
+    color:#075985;
+  }
+  .badge {
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:800;
+    background:#e8f8ee;
+    color:#18733b;
+  }
+
+  .footer-nav {
+    display:flex;
+    justify-content:space-between;
+    margin-top:22px;
+  }
+
+  @media(max-width:850px) {
+    .sidebar { width: 210px; }
+    .grid { grid-template-columns: 1fr; }
+    .main { padding: 20px; }
+  }
+  @media(max-width:650px) {
+    .app { display:block; }
+    .sidebar { width:100%; padding:18px; }
+    .side-note { display:none; }
+    .nav { display:flex; gap:5px; overflow:auto; }
+    .nav button { min-width:145px; }
+  
+  .site-header {
+    min-height: 82px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    border-bottom: 1px solid #e3ebef;
+    background: white;
+    margin: 0 -42px 28px;
+    padding: 14px 42px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    background: #075985;
+    color: white;
+    font-size: 21px;
+  }
+  .brand-name {
+    font-size: 20px;
+    font-weight: 850;
+    color: #073b5a;
+  }
+  .brand-subtitle {
+    color: #71808d;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+  .top-nav {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #f2f6f8;
+    padding: 5px;
+    border-radius: 12px;
+  }
+  .top-nav button {
+    border: 0;
+    background: transparent;
+    color: #52636f;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .top-nav button.active,
+  .top-nav button:hover {
+    background: white;
+    color: #075985;
+    box-shadow: 0 2px 8px rgba(20,50,70,.08);
+  }
+  .page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .service-pill {
+    background: white;
+    padding: 10px 15px;
+    border-radius: 22px;
+    font-size: 13px;
+    color: #61717c;
+    box-shadow: 0 4px 15px rgba(0,0,0,.05);
+  }
+
+  .topbar { align-items:flex-start; gap:12px; flex-direction:column; }
+  }
+
+  @media print {
+    body * { visibility:hidden; }
+    #printable, #printable * { visibility:visible; }
+    #printable { position:absolute; left:0; top:0; width:100%; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">⚡ SouthGrid</div>
+    <div class="subtitle">Electricity Bill Services • South India</div>
+
+    <nav class="nav">
+      <button class="active" onclick="showSlide(0)">01 &nbsp; Pay Bill</button>
+      <button onclick="showSlide(1)">02 &nbsp; Payment Status</button>
+      <button onclick="showSlide(2)">03 &nbsp; Print Bill</button>
+    </nav>
+
+    <div class="side-note">
+      <b>Demo portal</b><br>
+      Designed as a South Indian electricity-service dashboard. You can adapt the branding for AP, Telangana, Tamil Nadu, Karnataka or Kerala utilities.
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="site-header">
+      <div class="header-brand">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <div class="brand-name">SouthGrid</div>
+          <div class="brand-subtitle">Electricity Bill Services</div>
+        </div>
+      </div>
+
+      <nav class="top-nav">
+        <button class="active" onclick="showSlide(0)">Pay Bill</button>
+        <button onclick="showSlide(1)">Payment Status</button>
+        <button onclick="showSlide(2)">Print Bill</button>
+      </nav>
+    </header>
+
+    <div class="page-heading">
+      <h1 id="pageTitle">Pay Electricity Bill</h1>
+      <div class="service-pill">Service No: <b id="headerServiceNo">—</b></div>
+    </div>
+
+    <!-- SLIDE 1 -->
+    <section class="slide active">
+      <div class="hero">
+        <h2>Pay your electricity bill</h2>
+        <p>Fast, simple and secure bill payment from one screen.</p>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Fetch Your Bill</h3>
+          <div class="muted">Enter your service number to view the latest bill amount.</div>
+
+          <label>Electricity Board</label>
+          <select id="board">
+            <option>AP Electricity</option>
+            <option>Telangana Electricity</option>
+            <option>Tamil Nadu Electricity</option>
+            <option>Karnataka Electricity</option>
+            <option>Kerala Electricity</option>
+          </select>
+
+          <label>Service Number</label>
+          <input id="fetchServiceNo" placeholder="Enter service number">
+
+          <div class="actions">
+            <button class="btn primary" onclick="fetchBill()">Fetch Bill Amount</button>
+          </div>
+
+          <div id="billResult" style="display:none; margin-top:20px;">
+            <div style="background:#f5fafc;border-radius:12px;padding:18px;">
+              <div class="muted">Current Bill Amount</div>
+              <div class="amount" id="fetchedAmount">₹0</div>
+              <div class="row"><span>Billing Month</span><b>August 2026</b></div>
+              <div class="row"><span>Units Consumed</span><b>155 kWh</b></div>
+              <div class="row"><span>Due Date</span><b>31 Aug 2026</b></div>
+              <div class="actions">
+                <button class="btn primary" onclick="payBill()">Pay Bill</button>
+                <button class="btn secondary" onclick="showSlide(2)">View Bill</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="fetchMessage" class="status warning"></div>
+          <div id="payMessage" class="status success"></div>
+        </div>
+
+        <div class="card">
+          <h3>Payment Method</h3>
+          <label>Choose method</label>
+          <select id="method">
+            <option>UPI</option>
+            <option>Debit / Credit Card</option>
+            <option>Net Banking</option>
+          </select>
+          <label>UPI ID / Payment Reference</label>
+          <input id="paymentRef" placeholder="example@upi">
+          <label>Mobile Number</label>
+          <input value="98XXXXXX21" placeholder="Enter mobile number">
+          <div class="actions">
+            <button class="btn primary" onclick="payBill()">Proceed to Payment</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-nav">
+        <span></span>
+        <button class="btn secondary" onclick="showSlide(1)">Next: Payment Status →</button>
+      </div>
+    </section>
+
+    <!-- SLIDE 2 -->
+    <section class="slide">
+      <div class="hero">
+        <h2>Check payment status</h2>
+        <p>Verify whether your latest electricity bill payment was successful.</p>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Find Payment</h3>
+          <label>Service Number</label>
+          <input id="serviceNo" value="AP-2026-45821">
+          <label>Transaction / Receipt Number</label>
+          <input id="transactionNo" placeholder="e.g. TXN45821001">
+          <div class="actions">
+            <button class="btn primary" onclick="checkStatus()">Check Status</button>
+            <button class="btn secondary" onclick="document.getElementById('transactionNo').value='TXN45821001'">Use Demo ID</button>
+          </div>
+          <div id="statusMessage" class="status"></div>
+        </div>
+
+        <div class="card">
+          <h3>Latest Payment</h3>
+          <div class="row"><span>Transaction ID</span><b>TXN45821001</b></div>
+          <div class="row"><span>Date</span><b>25 Aug 2026</b></div>
+          <div class="row"><span>Amount</span><b>₹1,248</b></div>
+          <div class="row"><span>Method</span><b>UPI</b></div>
+          <div class="row"><span>Status</span><span class="badge">SUCCESS</span></div>
+          <div class="actions">
+            <button class="btn secondary" onclick="showSlide(2)">Go to Bill Printing</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-nav">
+        <button class="btn secondary" onclick="showSlide(0)">← Previous</button>
+        <button class="btn secondary" onclick="showSlide(2)">Next: Print Bill →</button>
+      </div>
+    </section>
+
+    <!-- SLIDE 3 -->
+    <section class="slide">
+      <div class="hero">
+        <h2>Print / Download Bill</h2>
+        <p>View your electricity bill and print a clean receipt for your records.</p>
+      </div>
+
+      <div class="card" id="printable">
+        <div class="bill">
+          <div class="bill-head">
+            <div>
+              <strong>⚡ SouthGrid Electricity Department</strong><br>
+              <span class="muted">Domestic Electricity Bill</span>
+            </div>
+            <div style="text-align:right">
+              <span class="badge">PAID</span><br>
+              <small>Bill No: SB-0826-45821</small>
+            </div>
+          </div>
+          <div class="bill-body">
+            <div class="grid">
+              <div>
+                <div class="row"><span>Consumer Name</span><b>Syam Kumar</b></div>
+                <div class="row"><span>Service Number</span><b id="printServiceNo">AP-2026-45821</b></div>
+                <div class="row"><span>Service Type</span><b>Domestic</b></div>
+                <div class="row"><span>Billing Month</span><b>August 2026</b></div>
+              </div>
+              <div>
+                <div class="row"><span>Previous Reading</span><b>8,420 kWh</b></div>
+                <div class="row"><span>Current Reading</span><b>8,575 kWh</b></div>
+                <div class="row"><span>Units Consumed</span><b>155 kWh</b></div>
+                <div class="row"><span>Due Date</span><b>31 Aug 2026</b></div>
+              </div>
+            </div>
+            <hr style="border:0;border-top:1px solid #e6edf1;margin:20px 0">
+            <div class="row"><span>Energy Charges</span><b>₹1,060</b></div>
+            <div class="row"><span>Fixed Charges</span><b>₹110</b></div>
+            <div class="row"><span>Taxes / Other Charges</span><b>₹78</b></div>
+            <div class="row"><span>Total Paid</span><span class="bill-total">₹1,248</span></div>
+            <div class="actions">
+              <button class="btn primary" onclick="window.print()">🖨 Print Bill</button>
+              <button class="btn secondary" onclick="alert('Demo: PDF generation can be connected here.')">Download PDF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-nav">
+        <button class="btn secondary" onclick="showSlide(1)">← Previous</button>
+        <button class="btn secondary" onclick="showSlide(0)">Back to Payment</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const titles = ["Pay Electricity Bill", "Payment Status", "Print / Download Bill"];
+
+function showSlide(index) {
+  document.querySelectorAll(".slide").forEach((s, i) => s.classList.toggle("active", i === index));
+  document.querySelectorAll(".top-nav button").forEach((b, i) => b.classList.toggle("active", i === index));
+  document.getElementById("pageTitle").textContent = titles[index];
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function fetchBill() {
+  const consumer = document.getElementById("fetchServiceNo").value.trim();
+  const result = document.getElementById("billResult");
+  const message = document.getElementById("fetchMessage");
+
+  if (!consumer) {
+    result.style.display = "none";
+    message.style.display = "block";
+    message.className = "status warning";
+    message.textContent = "Please enter your service number.";
+    return;
+  }
+
+  // Demo lookup. In a real system this would call the electricity-board API.
+  const demoBills = {
+    "AP-2026-45821": "1248",
+    "45821": "1248",
+    "123456789": "876",
+    "987654321": "1532"
+  };
+
+  const amount = demoBills[consumer] || "1248";
+  document.getElementById("fetchedAmount").textContent =
+    "₹" + Number(amount).toLocaleString("en-IN");
+
+  result.style.display = "block";
+  message.style.display = "none";
+  document.getElementById("printServiceNo").textContent = consumer;
+  document.getElementById("headerServiceNo").textContent = consumer;
+}
+
+function payBill() {
+  const consumer = document.getElementById("fetchServiceNo").value.trim();
+  const result = document.getElementById("billResult");
+  const msg = document.getElementById("payMessage");
+
+  if (!consumer || result.style.display === "none") {
+    alert("Please enter your service number and fetch the bill amount first.");
+    return;
+  }
+
+  msg.style.display = "block";
+  msg.textContent = "Demo payment initiated successfully. Transaction ID: TXN45821001";
+}
+
+function checkStatus() {
+  const id = document.getElementById("transactionNo").value.trim();
+  const msg = document.getElementById("statusMessage");
+  msg.style.display = "block";
+  if (id === "TXN45821001") {
+    msg.className = "status success";
+    msg.textContent = "✓ Payment successful — ₹1,248 received on 25 Aug 2026.";
+  } else if (id === "") {
+    msg.className = "status warning";
+    msg.textContent = "Please enter a transaction / receipt number.";
+  } else {
+    msg.className = "status warning";
+    msg.textContent = "Demo result: transaction not found. Connect this screen to your electricity-board payment API.";
+  }
+}
+</script>
+</body>
+</html>
